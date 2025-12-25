@@ -1,0 +1,68 @@
+# =========================
+# OS / Editor
+# =========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# =========================
+# Environment files (SECURITY)
+# =========================
+.env
+.env.local
+.env.production
+.env.development
+
+# =========================
+# Node.js
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# Backend build
+# =========================
+backend/dist/
+backend/build/
+
+# =========================
+# Frontend build
+# =========================
+frontend/dist/
+frontend/build/
+
+# =========================
+# Docker
+# =========================
+*.log
+docker-compose.override.yml
+
+# =========================
+# MongoDB
+# =========================
+data/
+dump/
+
+# =========================
+# Test / Coverage
+# =========================
+coverage/
+.nyc_output/
+
+# =========================
+# SSH / Keys (VERY IMPORTANT)
+# =========================
+*.pem
+*.ppk
+id_rsa
+id_rsa.pub
+
+# =========================
+# Temporary files
+# =========================
+tmp/
+temp/
