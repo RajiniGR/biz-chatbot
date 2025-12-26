@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/login";
-import Register from "./pages/Register";
-import Chat from "./pages/Chat";
-import Admin from "./pages/Admin";
+import Register from "./pages/register";
+import Chat from "./pages/chat";
+import Admin from "./pages/admin";
 import { useAuth } from "./hooks/useAuth";
 
 export default function App() {
