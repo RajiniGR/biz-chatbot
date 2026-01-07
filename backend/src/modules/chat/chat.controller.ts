@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import {
   createConversation,
   getConversationHistory,
@@ -30,7 +30,6 @@ export const getChatHistory = async (req: AuthRequest, res: Response) => {
 };
 
 export const resetChat = async (req: AuthRequest, res: Response) => {
-  console.log("inside resetChat");
   await resetConversationHistory(req.user!.id);
   res.status(200).json({ message: "Chat history reset successfully" });
 };
