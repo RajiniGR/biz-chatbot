@@ -1,20 +1,36 @@
-import { Response } from "express";
+import { Request, Response } from "express";
+import {
+  createConversation,
+  getConversationHistory,
+  resetConversationHistory,
+} from "./chat.service";
 import { AuthRequest } from "../../middleware/authMiddleware";
-import { askChatBot, getConversationHistory } from "./chat.service";
 
-export async function askBot(req: AuthRequest, res: Response) {
+export const askChat = async (req: AuthRequest, res: Response) => {
   try {
-    const { prompt } = req.body;
-    const userId = req.user!.id;
+    const { message } = req.body;
+    if (!message || typeof message !== "string") {
+      return res.status(400).json({ message: "Message is required" });
+    }
+    const reply = await createConversation(req.user!.id, message);
+    if(reply.status === 429) {
+      res.status(429).json({ message: "AI usage limit reached" });
+    }else{
+      res.status(200).json({ reply });
+    }
 
-    const reply = await askChatBot(userId, prompt);
-    res.json({ reply });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
+  } catch(err: any) {
+    res.status(429).json({ message: err.message || "AI usage limit reached" });
   }
-}
+};
 
-export async function getHistory(req: AuthRequest, res: Response) {
+export const getChatHistory = async (req: AuthRequest, res: Response) => {
   const history = await getConversationHistory(req.user!.id);
-  res.json(history);
-}
+  res.status(200).json(history);
+};
+
+export const resetChat = async (req: AuthRequest, res: Response) => {
+  console.log("inside resetChat");
+  await resetConversationHistory(req.user!.id);
+  res.status(200).json({ message: "Chat history reset successfully" });
+};

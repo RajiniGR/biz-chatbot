@@ -1,27 +1,30 @@
-import React, { useState } from "react";
-import api from "../services/api";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
-export default function Register(){
-  const [email,setEmail]=useState("");
-  const [password,setPassword]=useState("");
+export default function Register() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  async function submit(e:React.FormEvent){
-    e.preventDefault();
-    try{
-      await api.post("/auth/register",{ email, password });
-      alert("Registered. Now login.");
-      navigate("/login");
-    }catch(err:any){ alert(err.response?.data?.message || "Register failed"); }
-  }
+  const handleRegister = async () => {
+    await api.post("/auth/register", { email, password });
+    navigate("/login");
+  };
 
   return (
-    <form onSubmit={submit} className="card">
+    <div>
       <h2>Register</h2>
-      <input placeholder="email" value={email} onChange={e=>setEmail(e.target.value)} />
-      <input placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
-      <button>Register</button>
-    </form>
+      <input placeholder="Email" onChange={e => setEmail(e.target.value)} />
+      <input
+        placeholder="Password"
+        type="password"
+        onChange={e => setPassword(e.target.value)}
+      />
+      <div>
+        <button onClick={handleRegister}>Register</button>
+        <label>Already have an account? </label><a href="/login">Login</a>
+      </div>
+    </div>
   );
 }

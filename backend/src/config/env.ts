@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const requiredEnvs = ["OPENAI_API_KEY", "JWT_SECRET"];
+const requiredEnvs = ["JWT_SECRET"];
 
 for (const key of requiredEnvs) {
   if (!process.env[key]) {

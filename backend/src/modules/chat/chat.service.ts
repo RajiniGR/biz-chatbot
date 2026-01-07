@@ -1,51 +1,37 @@
-import { openai } from "../../config/openai";
-import { Conversation } from "./conversation.model";
-import { FAQ } from "./faq.model";
+import { Conversation } from "./chat.model";
+import { askOpenAI } from "../../config/openai";
+import { checkChatLimit, incrementChatUsage } from "../../config/limits";
 
-/**
- * Ask chatbot:
- * 1. Try FAQ match
- * 2. Fallback to OpenAI
- * 3. Persist conversation
- */
-export async function askChatBot(
+export const createConversation = async (
   userId: string,
-  prompt: string
-): Promise<string> {
-  // FAQ first (cheap + deterministic)
-  const faq = await FAQ.findOne({
-    question: { $regex: prompt, $options: "i" },
-  });
+  userMessage: string
+) => {
 
-  let reply: string;
-
-  if (faq) {
-    reply = faq.answer;
-  } else {
-    // OpenAI fallback
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
+  await checkChatLimit(userId);
+  const aiReply = await askOpenAI(userMessage);
+  if(aiReply.status === 429){
+    return aiReply;
+  }else{
+    const conversation = await Conversation.create({
+      userId,
+      messages: [
+        { role: "user", content: userMessage },
+        { role: "bot", content: aiReply },
+      ],
     });
-
-    reply = completion.choices[0].message.content ?? "No response";
+    await incrementChatUsage(userId);
   }
+  return aiReply;
+};
 
-  // Save conversation
-  await Conversation.create({
-    userId,
-    messages: [
-      { from: "user", text: prompt },
-      { from: "bot", text: reply },
-    ],
-  });
+export const getConversationHistory = async (userId: string) => {
+  const conversations = await Conversation.find({ userId })
+    .sort({ createdAt: 1 })
+    .lean();
 
-  return reply;
-}
+  return conversations.flatMap(c => c.messages);
+};
 
-/**
- * Fetch chat history for a user
- */
-export async function getConversationHistory(userId: string) {
-  return Conversation.find({ userId }).sort({ createdAt: -1 });
-}
+export const resetConversationHistory = async (userId: string) => {
+  await Conversation.deleteMany({ userId });
+};

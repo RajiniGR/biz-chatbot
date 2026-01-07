@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { FAQ } from "../chat/faq.model";
+import { FAQ } from "../faq/faq.model";
 
 export async function createFAQ(req: Request, res: Response) {
   const faq = await FAQ.create(req.body);

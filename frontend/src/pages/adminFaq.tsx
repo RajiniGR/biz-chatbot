@@ -35,7 +35,7 @@ export default function AdminFAQ(){
       <header className="header">
         <h3>Manage FAQs</h3>
         <div>
-          <button onClick={()=>window.history.back()}>Back</button>
+          <button onClick={()=>window.history.back()}>Back </button>
         </div>
       </header>
 

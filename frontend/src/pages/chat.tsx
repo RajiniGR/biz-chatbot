@@ -1,43 +1,83 @@
 import { useEffect, useState } from "react";
-import api from "../services/api";
+import ChatHeader from "../components/chatHeader";
+import ChatInput from "../components/chatInput";
+import ChatMessage from "../components/chatMessage";
+import {
+  askChat,
+  getChatHistory,
+  resetChat,
+} from "../services/chat.service";
 
-type Msg = {
-  from: "user" | "bot";
-  text: string;
+type Message = {
+  role: "user" | "bot";
+  content: string;
 };
 
 export default function Chat() {
-  const [msgs, setMsgs] = useState<Msg[]>([]);
-  const [text, setText] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    api.get("/chat/history").then((res) => {
-      const allMsgs = res.data.flatMap((c: any) => c.messages);
-      setMsgs(allMsgs);
+      const conversationHistory = (async () => {
+      try {
+        const history = await getChatHistory();
+        setMessages(history.data);
+      } catch (error) {
+        console.error("Failed to fetch conversation:", error);
+      }finally{
+        setLoading(false)
+      }
     });
+    conversationHistory();
   }, []);
 
-  const send = async () => {
-    if (!text) return;
+  const sendMessage = async (text: string) => {
+    setMessages(prev => [...prev, { role: "user", content: text }]);
+    setLoading(true);
 
-    setMsgs((prev) => [...prev, { from: "user", text }]);
+     try {
+      const res = await askChat(text);
+      console.log("aireply");
+        setMessages(prev => [
+          ...prev,
+          { role: "bot", content: res.data.reply },
+        ]);      
+    }catch(err: any) {
+        // console.log("Error occurred", err.response.data.message);
+        setMessages(prev => [...prev, { role: "bot", content: err.response.data.message }]);
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const res = await api.post("/chat/ask", { prompt: text });
-
-    setMsgs((prev) => [...prev, { from: "bot", text: res.data.reply }]);
-    setText("");
+  const resetConversation = async () => {
+    await resetChat();
+    setMessages([]);
   };
 
   return (
-    <div>
-      <h2>Chat</h2>
-      {msgs.map((m, i) => (
-        <p key={i}>
-          <b>{m.from}:</b> {m.text}
-        </p>
-      ))}
-      <input value={text} onChange={(e) => setText(e.target.value)} />
-      <button onClick={send}>Send</button>
+    <div className="h-screen flex flex-col bg-gray-100">
+      <ChatHeader />
+      <div>
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {messages.length === 0 ? (
+        <p>No conversation yet</p>
+        ) : (
+        messages.map((m, i) => (
+          <ChatMessage key={i} role={m.role} content={m.content} />
+        ))
+        )}
+        {loading && (
+          <div className="text-sm text-gray-500">Bot typing...</div>
+        )}
+      </div>
+
+      <ChatInput onSend={sendMessage} />
+
+      {/* <button onClick={sendMessage}>Send</button> */}
+      <button onClick={resetConversation}>Reset</button>
+    </div>
     </div>
   );
 }
