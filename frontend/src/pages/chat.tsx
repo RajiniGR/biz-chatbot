@@ -59,7 +59,6 @@ export default function Chat() {
   return (
     <div className="h-screen flex flex-col bg-gray-100">
       <ChatHeader />
-      <div>
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 ? (
         <p>No conversation yet</p>
@@ -77,7 +76,6 @@ export default function Chat() {
 
       {/* <button onClick={sendMessage}>Send</button> */}
       <button onClick={resetConversation}>Reset</button>
-    </div>
     </div>
   );
 }

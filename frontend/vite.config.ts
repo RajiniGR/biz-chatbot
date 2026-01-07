@@ -6,5 +6,8 @@ export default defineConfig({
     react({
       jsxRuntime: "automatic"
     })
-  ]
+  ],
+  css: {
+    postcss: "./postcss.config.cjs",
+  },
 });
